@@ -2,7 +2,12 @@ cmake_minimum_required(VERSION 3.0.2)
 project(dropper)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
+
+## UTF-8 编码
+add_compile_options(-fexec-charset=UTF-8)
+
+include_directories(include/rapidjson/include) ## add rapidjson
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -16,7 +21,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(PkgConfig)
+pkg_check_modules(LIBSERIAL REQUIRED libserial)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -70,9 +76,12 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
-#   DEPENDENCIES
-#   geographic_msgs#   geometry_msgs#   std_msgs
-# )
+#    DEPENDENCIES
+#    geometry_msgs
+#    mavros_msgs
+#    std_msgs
+#    geographic_msgs
+#  )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -104,8 +113,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES dropper
+ INCLUDE_DIRS include
+ LIBRARIES dropper
 #  CATKIN_DEPENDS geographic_msgs geometry_msgs roscpp std_msgs
 #  DEPENDS system_lib
 )
@@ -117,14 +126,22 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
+
+include_directories(${LIBSERIAL_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/dropper.cpp
 # )
+
+# 获取 src/lib/ 目录下的所有源文件
+file(GLOB DROPPER_SOURCES "src/lib/*.cc")
+
+# 将获取的源文件添加到库中
+add_library(dropper ${DROPPER_SOURCES})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -135,6 +152,10 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/dropper_node.cpp)
+
+add_executable(drop src/drop.cc)
+add_dependencies(drop ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(drop dropper ${catkin_LIBRARIES} ${LIBSERIAL_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -167,9 +188,9 @@ include_directories(
 
 ## Mark executables for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
-# install(TARGETS ${PROJECT_NAME}_node
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-# )
+install(TARGETS drop
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html

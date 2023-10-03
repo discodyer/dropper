@@ -1,0 +1,12 @@
+<launch>
+    <!-- vim: set ft=xml noet : -->
+
+    <arg name="dropper_serial_port_name" default="/dev/ttyS4" />
+    <arg name="dropper_serial_baud_rate" default="115200" />
+    <arg name="respawn_dropper" default="true" />
+
+    <node pkg="dropper" type="drop" name="dropper_node" output="screen" respawn="$(arg respawn_dropper)">
+        <param name="serial_port_name" type="string" value="$(arg dropper_serial_port_name)" />
+        <param name="serial_baud_rate" type="int" value="$(arg dropper_serial_baud_rate)" />
+    </node>
+</launch>
