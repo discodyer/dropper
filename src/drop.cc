@@ -36,10 +36,12 @@ int main(int argc, char **argv)
 
     Dropper dropper(serial_port_name, nh, serial_baud_rate);
 
-    ros::Rate rate(20);
+    ros::Rate rate(10);
 
     while (ros::ok())
     {
+        dropper.takeoffReader(50);
+        dropper.loop();
         ros::spinOnce();
         rate.sleep();
     }

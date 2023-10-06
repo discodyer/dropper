@@ -184,7 +184,7 @@ bool SerialBase::readByte(uint8_t &data, size_t timeout_ms)
         catch (const LibSerial::ReadTimeout &e)
         {
             // std::cerr << e.what() << '\n';
-            ROS_ERROR("Serial read timeout: %s", e.what());
+            // ROS_ERROR("Serial read timeout: %s", e.what());
             return false;
         }
     }
@@ -239,7 +239,7 @@ bool SerialBase::read(std::vector<uint8_t> &buffer, size_t buffer_size, size_t t
         }
         catch (const LibSerial::ReadTimeout &e)
         {
-            ROS_ERROR("Serial read timeout: %s", e.what());
+            // ROS_ERROR("Serial read timeout: %s", e.what());
             return false;
         }
     }
